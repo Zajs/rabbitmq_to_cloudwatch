@@ -6,6 +6,7 @@ from boto.ec2.cloudwatch import CloudWatchConnection
 import os
 from time import sleep
 
+
 def get_queue_depths(host, username, password, vhost):
     cl = Client(host, username, password)
     if not cl.is_alive():
@@ -20,8 +21,6 @@ def get_queue_depths(host, username, password, vhost):
 
 
 def publish_queue_depth_to_cloudwatch(cwc, queue_name, depth, namespace):
-    print("Putting metric namespace=%s name=%s unit=Count value=%i" %
-          (namespace, queue_name, depth))
     cwc.put_metric_data(namespace=namespace,
                         name=queue_name,
                         unit="Count",
@@ -38,12 +37,21 @@ def get_queue_depths_and_publish_to_cloudwatch(host, username, password, vhost, 
     depths = get_queue_depths(host, username, password, vhost)
     publish_depths_to_cloudwatch(depths, namespace)
 
+
 if __name__ == "__main__":
+    host = os.environ.get("RABBITMQ_HOST")
+    port = os.environ.get("RABBITMQ_PORT")
+    user = os.environ.get("RABBITMQ_USER")
+    password = os.environ.get("RABBITMQ_PASSWORD")
+    namespace = os.environ.get("CLOUDWATCH_NAMESPACE")
+    print("Starting host=%s:%s user=%s namespace=%s" % (host, port, user, namespace))
     while True:
         get_queue_depths_and_publish_to_cloudwatch(
-            os.environ.get("rabbitmq_management_host"),
-            os.environ.get("rabbitmq_management_user"),
-            os.environ.get("rabbitmq_management_password"),
+            host + ":" + port,
+            user,
+            password,
             "/",
-            "rabbitmq_depth")
-        sleep(60 * 5)
+            namespace)
+        sleep(60)
+
+#from https://github.com/trailbehind/AWS-Utilities/blob/master/rabbitmq-to-cloudwatch.py
