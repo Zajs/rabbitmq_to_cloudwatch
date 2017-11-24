@@ -46,12 +46,15 @@ if __name__ == "__main__":
     namespace = os.environ.get("CLOUDWATCH_NAMESPACE")
     print("Starting host=%s:%s user=%s namespace=%s" % (host, port, user, namespace))
     while True:
-        get_queue_depths_and_publish_to_cloudwatch(
-            host + ":" + port,
-            user,
-            password,
-            "/",
-            namespace)
+        try:
+            get_queue_depths_and_publish_to_cloudwatch(
+                host + ":" + port,
+                user,
+                password,
+                "/",
+                namespace)
+        except Exception as ex:
+            print(ex)
         sleep(60)
 
 #from https://github.com/trailbehind/AWS-Utilities/blob/master/rabbitmq-to-cloudwatch.py
