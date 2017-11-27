@@ -5,6 +5,7 @@ from pyrabbit.api import Client
 from boto.ec2.cloudwatch import CloudWatchConnection
 import os
 from time import sleep
+import traceback
 
 
 def get_queue_depths(host, username, password, vhost):
@@ -48,13 +49,14 @@ if __name__ == "__main__":
     while True:
         try:
             get_queue_depths_and_publish_to_cloudwatch(
-                host + ":" + port,
+                "%s:%s" % (host, port),
                 user,
                 password,
                 "/",
                 namespace)
         except Exception as ex:
+            traceback.print_exc()
             print(ex)
         sleep(60)
 
-#from https://github.com/trailbehind/AWS-Utilities/blob/master/rabbitmq-to-cloudwatch.py
+        # from https://github.com/trailbehind/AWS-Utilities/blob/master/rabbitmq-to-cloudwatch.py
